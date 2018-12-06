@@ -144,133 +144,107 @@ int main(void)
 	
 	USART_SendString("USART Tested!");
 	
-	while(1)
-	{
-			
-		TWO_Buttons_New_Value = PINC + PIND;
-		PINC_New_Value = PINC;
-		PIND_New_Value = PIND;
-		
-		if(TWO_Buttons_New_Value!=TWO_Buttons_Previous_Value)
+		while(1)
 		{
-			switch(TWO_Buttons_New_Value)
-			{
-				case (D_FRONT_PRESSED+C_RIGHT_PRESSED):
-				Front_Right.Send_ASCII();
-				check = true;
-				haha = false;
-				break;
-				
-				case (D_FRONT_PRESSED+C_LEFT_PRESSED):
-				Front_Left.Send_ASCII();
-				check = true;
-				haha = false;
-				break;
-				
-				default:
-				haha = true;
-				break;
-			}
-			TWO_Buttons_Previous_Value = TWO_Buttons_New_Value;
 			
-			_delay_ms(10);
-			//continue;
-		}
 		
-		else if(PINC_New_Value!=PINC_Previous_Value)
-		{
-			if(haha == true)
-			{
-				switch(PINC_New_Value)
-			{
-				case C_RIGHT_PRESSED:
-				Right.Send_ASCII();
-				check = true;
-				break;
+				TWO_Buttons_New_Value = PINC + PIND;
+		
+				if(TWO_Buttons_New_Value!=TWO_Buttons_Previous_Value)
+				{
+					switch(TWO_Buttons_New_Value)
+					{
+						case (D_FRONT_PRESSED+C_RIGHT_PRESSED):
+						Front_Right.Send_ASCII();
+						check = true;
+						haha = false;
+						break;
 				
-				case C_LEFT_PRESSED:
-				Left.Send_ASCII();
-				check = true;
-				break;
+						case (D_FRONT_PRESSED+C_LEFT_PRESSED):
+						Front_Left.Send_ASCII();
+						check = true;
+						haha = false;
+						break;
 				
-				case C_EXTRA1_PRESSED:
-				Extra1.Send_ASCII();
-				check = true;
-				break;
-				
-			}
-			}
-			PINC_Previous_Value = PINC_New_Value;
+						default:
+							if(PIND == D_FRONT_PRESSED )
+							{
+								Front.Send_ASCII();
+								check = true;
+								break;
+					
+							}
+							else if(PIND ==D_BACK_PRESSED )
+							{
+								Back.Send_ASCII();
+								check = true;
+								break;
+							}
+					
+							else if(PINC == C_RIGHT_PRESSED )
+							{
+								Right.Send_ASCII();
+								check = true;
+								break;
+							}
+							else if(PINC ==C_LEFT_PRESSED )
+							{
+						
+								Left.Send_ASCII();
+								check = true;
+								break;
+							}
+							else if(PIND == D_LEV_DOWN_PRESSED )
+							{
+								Lev_Down.Send_ASCII();
+								check = true;
+								break;
+							}
+					
+							else if(PIND == D_LEV_UP_PRESSED )
+							{
+								Lev_Up.Send_ASCII();
+								check = true;
+								break;
+							}
+							
+							break;
+					
+					}
+					TWO_Buttons_Previous_Value = TWO_Buttons_New_Value;
+					_delay_ms(10);
+				}
+			  
 			
-				_delay_ms(10);			//This delay is inserted here in order to compensate for the RISE_TIME of USART RX TX Lines
-		}
+				if((PINC == PINC_RELEASED)&&(PIND == PIND_RELEASED))
+				{
+					if(check == true)
+					{
+						Brake.Send_ASCII();
+						check = false;
+					}
+				
+				}
+			
 		  
-		else if(PIND_New_Value!=PIND_Previous_Value)
-		{
-			if(haha == true)
-			{
-				switch(PIND_New_Value)
-			{
-				case D_FRONT_PRESSED:
-				Front.Send_ASCII();
-				check = true;
-				break;
-				
-				case D_BACK_PRESSED:
-				Back.Send_ASCII();
-				check = true;
-				break;
-				
-				case D_LEV_DOWN_PRESSED:
-				Lev_Down.Send_ASCII();
-				check = true;
-				break;
-				
-				case D_LEV_UP_PRESSED:
-				Lev_Up.Send_ASCII();
-				check = true;
-				break;
-				
-			}
-			}
-			PIND_Previous_Value = PIND_New_Value;
-			_delay_ms(10);		//This delay is inserted here in order to compensate for the RISE_TIME of USART RX TX Lines
-
-		}
-		
-				else if((PINC == PINC_RELEASED)&&(PIND == PIND_RELEASED))
-		{
-			if(check == true)
-			{
-				Brake.Send_ASCII();
-				check = false;
-			}
-			
-		}
-		
-	/******************Start Conversion***************/
-	
-		 /* dtostrf(new_ADC_value,3,2,float_);
-		  sprintf(buffer,"POT =  %s\n",float_);
-		  USART_SendString(buffer);
-		  calculated=0;*/
-		  
-		 if((abs(new_ADC_value - old_ADC_val))>=20)
-		  {
-			  send_value =  3 + ((0.085)*new_ADC_value);
-			  dtostrf(send_value,3,2,float_);
-			   sprintf(buffer,"%d",send_value);
-			   USART_SendString(buffer);
-			   _delay_ms(5);
-			   USART_TxChar('s');
+				 if((abs(new_ADC_value - old_ADC_val))>=20)
+				  {
+					  send_value =  3 + ((0.085)*new_ADC_value);
+					  dtostrf(send_value,3,2,float_);
+					  sprintf(buffer,"%d",send_value);
+					   USART_SendString(buffer);
+					   _delay_ms(5);
+					   USART_TxChar('s');
 			   
-			  old_ADC_val = new_ADC_value;
-		  }
+					  old_ADC_val = new_ADC_value;
+				  }
 		  
-		  ADCSRA|=1<<ADSC;
+				  ADCSRA|=1<<ADSC;
 				 
 		
-	}
+		}
+
+
 }
 
 void ADC_Init(void)
@@ -288,82 +262,6 @@ ISR(ADC_vect)
 	TenBitResults=ADCH<<8|Lowadc;
 	calculated=(0.1953125*TenBitResults);
 	new_ADC_value=(int)calculated;
-	//sum_=sum_+rotation_angle;
-	//loop++;
-	
-	
-	
-	/*if(loop>=20)
-	{
-		calculated=(sum_*0.02)*0.35;			//dividing total value by the no of observations and finally introducing gear ratio
-		new_ADC_value=(int)calculated;
-		sum_=0;
-		loop=0;
-		
-	}*/
 }
 
 
-/*
- dtostrf(value,3,2,float_);
- sprintf(buffer,"the value is-> %s\r\n",float_);
- USART_SendString(buffer);
- */
-
-
-/*
-
-if(((PIND & (1<<Front_Button))|(PINC & (1<<Left_Button))) == 0)
-{
-	Fan.Send_ASCII();
-	continue;
-}
-
-if(((PIND & (1<<Front_Button))|(PINC & (1<<Right_Button))) == 0)
-{
-	Brake.Send_ASCII();
-	continue;
-}
-
-if(((PIND & (1<<Back_Button))|(PINC & (1<<Right_Button))) == 0)
-{
-	Lev_Down.Send_ASCII();
-	_delay_ms(1000);
-	continue;
-}
-
-if((PIND & (1<<Front_Button)) == 0)
-Front.Send_ASCII();
-// _delay_ms(10);
-
-if((PIND & (1<<Back_Button)) == 0)
-Back.Send_ASCII();
-// _delay_ms(10);
-
-if((PINC & (1<<Left_Button)) == 0)
-Left.Send_ASCII();
-// _delay_ms(10);
-
-if((PINC & (1<<Right_Button)) == 0)
-Right.Send_ASCII();
-// _delay_ms(10);
-
-if((PIND & (1<<Lev_Up_Button)) == 0)
-{
-	Lev_Up.Send_ASCII();
-	_delay_ms(1000);
-}
-
-*/
-
-/*
-	value = PINC;
-	dtostrf(value,3,2,float_);
-	sprintf(buffer,"PINC is-> %s\t",float_);
-	USART_SendString(buffer);
-	
-	value = PIND;
-	dtostrf(value,3,2,float_);
-	sprintf(buffer,"PIND is-> %s\r\n",float_);
-	USART_SendString(buffer);
-	*/
